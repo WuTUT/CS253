@@ -70,6 +70,8 @@ plugins {
 // here, but it also doesn't hurt.
 subprojects {
     repositories {
+        //maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        //maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
         google()
         jcenter()
     }

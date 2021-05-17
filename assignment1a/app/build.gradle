@@ -51,6 +51,7 @@ android {
             showStandardStreams = true
         }
     }
+    compileSdkVersion 30
 
     configurations.all {
         resolutionStrategy.force 'com.google.code.findbugs:jsr305:3.0.2'
