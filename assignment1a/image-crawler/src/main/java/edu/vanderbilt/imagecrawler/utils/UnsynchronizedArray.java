@@ -207,6 +207,7 @@ public class UnsynchronizedArray<E>
             System.arraycopy(mElementData, index + 1, mElementData, index, mSize - index - 1);
         }
         mSize -= 1;
+        mElementData[mSize] = null; // so gc will do its work!
         return ret;
     }
 
@@ -280,7 +281,10 @@ public class UnsynchronizedArray<E>
     @Override
     public void ensureCapacityInternal(int minCapacity) {
         // TODO -- you fill in here.
-        if (mElementData.length < minCapacity) {
+        if (mElementData == EMPTY_ELEMENTDATA) {
+            int capacity = minCapacity > DEFAULT_CAPACITY ? minCapacity : DEFAULT_CAPACITY;
+            mElementData = new Object[capacity];
+        } else if (mElementData.length < minCapacity) {
             Object[] newElementData = new Object[minCapacity * 2];
             System.arraycopy(mElementData, 0, newElementData, 0, mSize);
             mElementData = newElementData;
