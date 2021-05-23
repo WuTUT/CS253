@@ -1,9 +1,7 @@
 package edu.vanderbilt.imagecrawler.crawlers;
 
 import java.net.URL;
-import java.util.Objects;
 
-import edu.vanderbilt.imagecrawler.utils.Crawler;
 import edu.vanderbilt.imagecrawler.utils.Image;
 
 import static edu.vanderbilt.imagecrawler.utils.Crawler.Type.IMAGE;
@@ -66,10 +64,15 @@ public class SequentialStreamsCrawler // Loaded via reflection
      */
     protected int crawlPage(String pageUri, int depth) {
         log("[" + Thread.currentThread().getName()
-            + "] Crawling " + pageUri + " (depth " + depth + ")");
+                + "] Crawling " + pageUri + " (depth " + depth + ")");
 
         // TODO -- you fill in here replacing this statement with your solution.
-        return 0;
+        return mWebPageCrawler.getPage(pageUri)
+                .getPageElements(IMAGE, PAGE)
+                .stream()
+                .mapToInt(e -> e.getType() == IMAGE ? processImage(e.getURL()) : performCrawl(e.getUrl(), depth + 1))
+                .sum();
+
     }
 
     /**
@@ -90,6 +93,10 @@ public class SequentialStreamsCrawler // Loaded via reflection
         //    images that fail to download or transform correctly).
 
         // TODO -- you fill in here replacing this statement with your solution.
-        return 0;
+        Image image = getOrDownloadImage(url);
+        return image == null ? 0 : (int) mTransforms
+                .stream()
+                .filter(transform -> createNewCacheItem(image, transform) && applyTransform(transform, image) != null)
+                .count();
     }
 }

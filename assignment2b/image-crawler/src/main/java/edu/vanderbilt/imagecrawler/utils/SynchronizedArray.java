@@ -14,23 +14,23 @@ import java.util.stream.Stream;
  */
 public class SynchronizedArray<E> implements Array<E> {
     // TODO -- you fill in any necessary field(s).
-    
+    Array<E> array;
 
     /**
      * Constructs an empty synchronized array.
      */
     public SynchronizedArray() {
         // TODO -- you fill in here.
-        
+        array = new UnsynchronizedArray<E>();
     }
 
     /**
      * Constructs a synchronized array from an {@code
-     * unsynchronizedArray} without making a copy.
+     * unsynchronizedArray}.
      */
     public SynchronizedArray(Array<E> unsynchronizedArray) {
         // TODO -- you fill in here.
-        
+        array = unsynchronizedArray;
     }
 
     /**
@@ -43,7 +43,7 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public SynchronizedArray(Collection<? extends E> c) {
         // TODO -- you fill in here.
-        
+        array = new UnsynchronizedArray<E>(c);
     }
 
     /**
@@ -53,7 +53,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public boolean isEmpty() {
         // TODO -- you fill in here (replace 'false' with correct code).
-        return false;
+        synchronized (this) {
+            return array.isEmpty();
+        }
     }
 
     /**
@@ -63,7 +65,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public int size() {
         // TODO -- you fill in here (replace '0' with correct code).
-        return 0;
+        synchronized (this) {
+            return array.size();
+        }
     }
 
     /**
@@ -77,7 +81,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public int indexOf(Object o) {
         // TODO -- you fill in here (replace '-1' with correct code).
-        return -1;
+        synchronized (this) {
+            return array.indexOf(o);
+        }
     }
 
     /**
@@ -95,7 +101,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public boolean addAll(Collection<? extends E> c) {
         // TODO -- you fill in here (replace 'false' with correct code).
-        return false;
+        synchronized (this) {
+            return array.addAll(c);
+        }
     }
 
     /**
@@ -113,7 +121,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public boolean addAll(Array<E> a) {
         // TODO -- you fill in here (replace 'false' with correct code).
-        return false;
+        synchronized (this) {
+            return array.addAll(a);
+        }
     }
 
     /**
@@ -126,7 +136,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public E remove(int index) {
         // TODO -- you fill in here (replace 'null' with correct code).
-        return null;
+        synchronized (this) {
+            return array.remove(index);
+        }
     }
 
     /**
@@ -137,7 +149,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public E get(int index) {
         // TODO -- you fill in here (replace 'null' with correct code).
-        return null;
+        synchronized (this) {
+            return array.get(index);
+        }
     }
 
     /**
@@ -150,7 +164,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public E set(int index, E element) {
         // TODO -- you fill in here (replace 'null' with correct code).
-        return null;
+        synchronized (this) {
+            return array.set(index, element);
+        }
     }
 
     /**
@@ -161,7 +177,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public boolean add(E element) {
         // TODO -- you fill in here (replace 'false' with correct code).
-        return false;
+        synchronized (this) {
+            return array.add(element);
+        }
     }
 
     /**
@@ -169,7 +187,13 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public Array<E> toUnsynchronizedArray() {
         // TODO -- you fill in here (replace 'null' with correct code).
-        return null;
+        synchronized (this) {
+            UnsynchronizedArray<E> newArray = new UnsynchronizedArray<>();
+            if (array.size() != 0) {
+                newArray.addAll(array);
+            }
+            return newArray;
+        }
     }
 
     /**
@@ -178,7 +202,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public Object[] uncheckedToArray() {
         // TODO -- you fill in here (replace 'null' with correct code).
-        return null;
+        synchronized (this) {
+            return array.uncheckedToArray();
+        }
     }
 
     /**
@@ -198,7 +224,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public Object[] toArray() {
         // TODO -- you fill in here (replace 'null' with correct code).
-        return null;
+        synchronized (this) {
+            return array.toArray();
+        }
     }
 
     /**
@@ -220,7 +248,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public <T> T[] toArray(T[] a) {
         // TODO -- you fill in here (replace 'null' with correct code).
-        return null;
+        synchronized (this) {
+            return array.toArray(a);
+        }
     }
 
     /**
@@ -233,7 +263,9 @@ public class SynchronizedArray<E> implements Array<E> {
     @NotNull
     public Iterator<E> iterator() {
         // TODO - you fill in here (replace 'null' with correct code).
-        return null;
+        synchronized (this) {
+            return array.iterator();
+        }
     }
 
     /**
@@ -245,7 +277,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public void replaceAll(UnaryOperator<E> operator) {
         // TODO -- you fill in here.
-        
+        synchronized (this) {
+            array.replaceAll(operator);
+        }
     }
 
     /**
@@ -260,7 +294,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public void forEach(Consumer<? super E> action) {
         // TODO -- you fill in here.
-        
+        synchronized (this) {
+            array.forEach(action);
+        }
     }
 
     /*
@@ -274,8 +310,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public Stream<E> parallelStream() {
         // TODO -- you fill in here (replace 'null' with correct code).
-        return null;
-
+        synchronized (this) {
+            return array.parallelStream();
+        }
     }
 
     /**
@@ -285,7 +322,9 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public Stream<E> stream() {
         // TODO -- you fill in here (replace 'null' with correct code).
-        return null;
+        synchronized (this) {
+            return array.stream();
+        }
     }
 
     /**
@@ -296,12 +335,14 @@ public class SynchronizedArray<E> implements Array<E> {
      */
     public Spliterator<E> spliterator() {
         // TODO -- you fill in here (replace 'null' with correct code).
-        return null;
+        return array.spliterator();
     }
 
     @Override
     public void rangeCheck(int index) {
         // TODO -- you fill in here.
-        
+        synchronized (this) {
+            array.rangeCheck(index);
+        }
     }
 }

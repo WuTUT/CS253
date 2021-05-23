@@ -5,6 +5,9 @@ import java.net.URL;
 import edu.vanderbilt.imagecrawler.utils.Crawler;
 import edu.vanderbilt.imagecrawler.utils.Image;
 
+import static edu.vanderbilt.imagecrawler.utils.Crawler.Type.IMAGE;
+import static edu.vanderbilt.imagecrawler.utils.Crawler.Type.PAGE;
+
 /**
  * This ImageCrawler implementation uses Java parallel streams to
  * perform an "image crawl" starting from a root Uri.  Images from
@@ -78,7 +81,11 @@ public class ParallelStreamsCrawler1 // Loaded via reflection
         // Return a count of all the images downloaded, processed, and
         // stored.
         // TODO -- you fill in here replacing this statement with your solution.
-        return 0;
+        return page
+                .getPageElements(IMAGE, PAGE)
+                .parallelStream()
+                .mapToInt(e -> e.getType() == IMAGE ? processImage(e.getURL()) : performCrawl(e.getUrl(), depth + 1))
+                .sum();
     }
 
     /**
@@ -107,7 +114,11 @@ public class ParallelStreamsCrawler1 // Loaded via reflection
         }
 
         // TODO -- you fill in here replacing this statement with your solution.
-        return 0;
+        return (int) mTransforms
+                .parallelStream()
+                .filter(transform -> createNewCacheItem(image, transform))
+                .filter(transform -> applyTransform(transform, image) != null)
+                .count();
     }
 }
 
