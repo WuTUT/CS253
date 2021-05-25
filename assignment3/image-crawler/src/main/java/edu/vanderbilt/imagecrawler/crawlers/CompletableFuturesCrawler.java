@@ -1,8 +1,8 @@
 package edu.vanderbilt.imagecrawler.crawlers;
 
 import java.net.URL;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import edu.vanderbilt.imagecrawler.utils.Array;
@@ -22,13 +22,13 @@ import static edu.vanderbilt.imagecrawler.utils.Crawler.Type.PAGE;
  * can be displayed to the user.
  */
 public class CompletableFuturesCrawler
-       extends ImageCrawler {
+        extends ImageCrawler {
     /**
      * Stores a completed future with value of 0.
      */
     // TODO -- you fill in here replacing this statement with your solution.
     protected CompletableFuture<Integer> mZero =
-        null;
+            CompletableFuture.completedFuture(0);
 
     /**
      * Perform the web crawl.
@@ -44,7 +44,7 @@ public class CompletableFuturesCrawler
         // only method in this class that should call join().
 
         // TODO -- you fill in here replacing this statement with your solution.
-        return 0;
+        return performCrawlAsync(pageUri, depth).join();
     }
 
     /**
@@ -78,7 +78,7 @@ public class CompletableFuturesCrawler
         } else
             // Invoke the helper method.
             return performCrawlHelper(pageUri,
-                                      depth);
+                    depth);
     }
 
     /**
@@ -96,7 +96,7 @@ public class CompletableFuturesCrawler
             // Get a future to the HTML page associated with pageUri,
             // which is downloaded asynchronously.
             CompletableFuture<Crawler.Page> pageFuture =
-                getPageAsync(pageUri);
+                    getPageAsync(pageUri);
 
             // The following two asynchronous method calls run
             // concurrently in the common fork-join thread pool after
@@ -105,19 +105,19 @@ public class CompletableFuturesCrawler
             // Get a future to the # of images in this HTML page,
             // which are downloaded/stored asynchronously.
             CompletableFuture<Integer> imagesOnPageFuture =
-                getImagesOnPageAsync(pageFuture);
+                    getImagesOnPageAsync(pageFuture);
 
             // Get a future to the # of images linked from this page,
             // which are also downloaded/stored asynchronously.
             CompletableFuture<Integer> imagesOnPageLinksFuture =
-                crawlHyperLinksOnPageAsync(pageFuture,
-                                           // Increment depth.
-                                           depth + 1);
+                    crawlHyperLinksOnPageAsync(pageFuture,
+                            // Increment depth.
+                            depth + 1);
 
             // Return a future to the combined results of the two
             // futures params whenever they complete asynchronously.
             return combineResults(imagesOnPageFuture,
-                                  imagesOnPageLinksFuture);
+                    imagesOnPageLinksFuture);
         } catch (Exception e) {
             log("For '" + pageUri + "': " + e.getMessage());
             // Return completed future with value 0 if an exception
@@ -140,7 +140,7 @@ public class CompletableFuturesCrawler
         // the mWebPageCrawler field.
 
         // TODO -- you fill in here replacing this statement with your solution.
-        return null;
+        return CompletableFuture.supplyAsync(() -> mWebPageCrawler.getPage(pageUri));
     }
 
     /**
@@ -150,17 +150,17 @@ public class CompletableFuturesCrawler
      * @param pageFuture A completable future to the page that's being
      *                   downloaded
      * @return A completable future to an integer containing the # of
-     *         images downloaded/stored on this page
+     * images downloaded/stored on this page
      */
     protected CompletableFuture<Integer>
-        getImagesOnPageAsync(CompletableFuture<Crawler.Page> pageFuture) {
+    getImagesOnPageAsync(CompletableFuture<Crawler.Page> pageFuture) {
         // Return a completable future to an integer containing the #
         // of images processed on this page.  This method should call
         // the getImagesOnPage() and processImages() methods via a
         // fluent chain of asynchronous completion stage methods.
 
         // TODO -- you fill in here replacing this statement with your solution.
-        return null;
+        return pageFuture.thenApplyAsync(this::getImagesOnPage).thenComposeAsync(this::processImages);
     }
 
     /**
@@ -174,8 +174,8 @@ public class CompletableFuturesCrawler
      * downloaded/stored on pages linked from this page
      */
     protected CompletableFuture<Integer>
-        crawlHyperLinksOnPageAsync(CompletableFuture<Crawler.Page> pageFuture,
-                                   int depth) {
+    crawlHyperLinksOnPageAsync(CompletableFuture<Crawler.Page> pageFuture,
+                               int depth) {
         // Return a future to an integer containing the # of images
         // processed on pages linked from this page.  This method
         // should asynchronously call the crawlHyperLinksOnPage()
@@ -183,7 +183,7 @@ public class CompletableFuturesCrawler
         // in the page.
 
         // TODO -- you fill in here replacing this statement with your solution.
-        return null;
+        return pageFuture.thenComposeAsync(page -> crawlHyperLinksOnPage(page, depth));
     }
 
     /**
@@ -197,14 +197,14 @@ public class CompletableFuturesCrawler
      * futures params after they complete
      */
     protected CompletableFuture<Integer>
-        combineResults(CompletableFuture<Integer> imagesOnPageFuture,
-                       CompletableFuture<Integer> imagesOnPageLinksFuture) {
+    combineResults(CompletableFuture<Integer> imagesOnPageFuture,
+                   CompletableFuture<Integer> imagesOnPageLinksFuture) {
         // Returns a completable future that synchronously
         // combines/sums the results of the two futures params after
         // they complete asynchronously.
 
         // TODO -- you fill in here replacing this statement with your solution.
-        return null;
+        return imagesOnPageFuture.thenCombine(imagesOnPageLinksFuture, Integer::sum);
     }
 
     /**
@@ -228,7 +228,11 @@ public class CompletableFuturesCrawler
 
         // TODO -- you fill in here replacing this statement with your
         // solution.
-        return null;
+        return page
+                .getPageElementsAsStrings(PAGE)
+                .stream().map(pageUri -> performCrawlAsync(pageUri, depth))
+                .collect(FuturesCollectorStream.toFuture())
+                .thenApply(x -> x.reduce(0, Integer::sum));
     }
 
     /**
@@ -237,8 +241,8 @@ public class CompletableFuturesCrawler
      *
      * @param urls array of URLs corresponding to images on the page
      * @return A completable future to an integer that counts how many
-     *         images were downloaded, stored, and transformed for all 
-     *         {@code urls} on the page
+     * images were downloaded, stored, and transformed for all
+     * {@code urls} on the page
      */
     protected CompletableFuture<Integer> processImages(Array<URL> urls) {
         // Return a completable future containing a count of the # of
@@ -253,7 +257,14 @@ public class CompletableFuturesCrawler
 
         // TODO -- you fill in here replacing this statement with your
         // solution.
-        return null;
+        return urls
+                .stream()
+                .map(this::downloadAndStoreImageAsync)
+                .map(this::transformImageAsync)
+                .map(imageStreamFuture -> imageStreamFuture.thenApply(imageStream -> (int) imageStream.count()))
+                .collect(FuturesCollectorStream.toFuture())
+                .thenApply(integerStream -> integerStream.reduce(0, Integer::sum));
+
     }
 
     /**
@@ -262,10 +273,10 @@ public class CompletableFuturesCrawler
      *
      * @param imageFuture A future to an image that's being downloaded
      * @return A completable future to an stream of Images indicating
-     *         the transform operation(s) success or failure.
+     * the transform operation(s) success or failure.
      */
     protected CompletableFuture<Stream<Image>>
-        transformImageAsync(CompletableFuture<Image> imageFuture) {
+    transformImageAsync(CompletableFuture<Image> imageFuture) {
         // Return a completable future to an stream of Images that
         // indicate success/failure of the images processed by
         // applying the transforms in the mTransforms field.  This
@@ -276,6 +287,14 @@ public class CompletableFuturesCrawler
         // and applyTransformAsync()).
 
         // TODO -- you fill in here replacing this statement with your solution.
-        return null;
+        return imageFuture
+                .thenCompose(image -> mTransforms
+                        .stream()
+                        .filter(transform -> createNewCacheItem(image, transform))
+                        .map(transform -> applyTransformAsync(transform, image))
+                        .filter(Objects::nonNull)
+                        .collect(FuturesCollectorStream.toFuture())
+                );
+
     }
 }

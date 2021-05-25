@@ -14,19 +14,19 @@ public final class ArraySpliterator<E>
      * The array to traverse and/or partition.
      */
     // TODO (graduates 1b and undergraduates 2a) - you fill in here.
-    
+    Array<E> array;
 
     /**
      * Current index, modified on advance/split.
      */
     // TODO (graduates 1b and undergraduates 2a) - you fill in here.
-    
+    int curIndex;
 
     /**
      * One past the end of the spliterator range.
      */
     // TODO (graduates 1b and undergraduates 2a) - you fill in here.
-    
+    int endIndex;
 
     /**
      * Create new spliterator covering the given range.
@@ -38,7 +38,9 @@ public final class ArraySpliterator<E>
                 Spliterator.ORDERED | Spliterator.SIZED | Spliterator.SUBSIZED);
 
         // TODO (graduates 1b and undergraduates 2a) - you fill in here.
-        
+        this.array = array;
+        curIndex = origin;
+        endIndex = end;
     }
 
     /**
@@ -49,6 +51,14 @@ public final class ArraySpliterator<E>
     public boolean tryAdvance(Consumer<? super E> action) {
         // TODO (graduates 1b and undergraduates 2a)
         //  you fill in here replacing this statement with your solution.
+        if (action == null) {
+            throw new NullPointerException();
+        }
+        if (curIndex < endIndex) {
+            action.accept((E) array.uncheckedToArray()[curIndex]);
+            curIndex++;
+            return true;
+        }
         return false;
     }
 
@@ -59,6 +69,12 @@ public final class ArraySpliterator<E>
     public ArraySpliterator<E> trySplit() {
         // TODO (graduates 1b and undergraduates 2a)
         //  you fill in here replacing this statement with your solution.
-        return null;
+        if (endIndex - curIndex <= 1) {
+            return null;
+        }
+        int mid = curIndex + (endIndex - curIndex) / 2;
+        ArraySpliterator<E> ret = new ArraySpliterator<E>(array, curIndex, mid);
+        curIndex = mid;
+        return ret;
     }
 }

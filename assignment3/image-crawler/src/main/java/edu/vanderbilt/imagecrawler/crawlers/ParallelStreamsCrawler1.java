@@ -20,7 +20,7 @@ import static edu.vanderbilt.imagecrawler.utils.Crawler.Type.PAGE;
  * parallel streams instead of sequential streams.
  */
 public class ParallelStreamsCrawler1 // Loaded via reflection
-       extends ImageCrawler {
+        extends ImageCrawler {
     /**
      * Recursively crawls the given page and returns the total
      * number of processed images.
@@ -68,7 +68,7 @@ public class ParallelStreamsCrawler1 // Loaded via reflection
      */
     protected int crawlPage(String pageUri, int depth) {
         log("[" + Thread.currentThread().getName()
-            + "] Crawling " + pageUri + " (depth " + depth + ")");
+                + "] Crawling " + pageUri + " (depth " + depth + ")");
 
         // Get the HTML page associated with pageUri.
         Crawler.Page page = mWebPageCrawler.getPage(pageUri);
@@ -81,7 +81,11 @@ public class ParallelStreamsCrawler1 // Loaded via reflection
         // Return a count of all the images downloaded, processed, and
         // stored.
         // TODO -- you fill in here replacing this statement with your solution.
-        return 0;
+        return page
+                .getPageElements(IMAGE, PAGE)
+                .parallelStream()
+                .mapToInt(e -> e.getType() == IMAGE ? processImage(e.getURL()) : performCrawl(e.getUrl(), depth + 1))
+                .sum();
     }
 
     /**
@@ -98,7 +102,7 @@ public class ParallelStreamsCrawler1 // Loaded via reflection
         // 3. Try to create a new cached image item for each
         //    transform skipping any that already cached.
         // 4. Transform and store each non-cached image.
-        // 5. Return the count of transformed images (don't count any 
+        // 5. Return the count of transformed images (don't count any
         //    images that fail to download or transform correctly).
 
         // Download the image.
@@ -110,7 +114,11 @@ public class ParallelStreamsCrawler1 // Loaded via reflection
         }
 
         // TODO -- you fill in here replacing this statement with your solution.
-        return 0;
+        return (int) mTransforms
+                .parallelStream()
+                .filter(transform -> createNewCacheItem(image, transform))
+                .filter(transform -> applyTransform(transform, image) != null)
+                .count();
     }
 }
 
